@@ -24,5 +24,6 @@ import handlers
 config = {'jinja_templates': join(dirname(__file__),'templates')}
 
 app = webapp2.WSGIApplication([
-    ('/', handlers.TemplateHandler)
+    ('/', handlers.TemplateHandler),
+    ('/dashboard/', handlers.Dashboard),
 ], debug=True, config=config)

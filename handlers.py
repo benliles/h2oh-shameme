@@ -3,13 +3,16 @@ from os.path import dirname, join
 
 from jinja2 import Environment, FileSystemLoader
 import webapp2
-
+from google.appengine.api import users
 
 
 log = getLogger('goal_shame.handlers')
 
 class TemplateHandler(webapp2.RequestHandler):
     template = 'index.html'
+
+    def get_current_user(self):
+        return users.get_current_user()
 
     def get_template(self):
         log.debug('%s.get_template()' % (repr(self),))
@@ -24,6 +27,12 @@ class TemplateHandler(webapp2.RequestHandler):
     def get_context_data(self, **kwargs):
         log.debug('%s.get_context_data(**kwargs=%s)' % (repr(self),
             unicode(kwargs),))
+        kwargs['user'] = self.get_current_user()
+        if kwargs['user']:
+            kwargs['logout_url'] = users.create_logout_url("/")
+        else:
+            kwargs['login_url'] = users.create_login_url("/")
+
         return kwargs
 
     def __call__(self, request, *args, **kwargs):
@@ -42,3 +51,5 @@ class TemplateHandler(webapp2.RequestHandler):
             self.get_jinja_environment().get_template(self.get_template())
         self.response.write(template.render(context))
 
+class Dashboard(TemplateHandler):
+    template = 'dashboard.html'

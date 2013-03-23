@@ -1,0 +1,48 @@
+{% extends "bootstrap.html" %}
+{% block container_content %}
+<div class="row">
+    <div class="span9">
+        <h1>Dashboard</h1>
+        <h2>Goals</h2>
+        <ol>
+            <li>Avoid McDonalds until 3/31/2013</li>
+        </ol>
+
+        <div id="goals-map">
+
+        </div>
+
+    </div>
+    <div class="span3">
+        <h3>Feed</h3>
+        <ul class="thumbnails">
+            <li class="span3">
+            <h4>Example title</h4>
+            </li>
+        </ul>
+
+    </div>
+</div>
+{% endblock %}
+{% block additional_javascript %}
+<script src="https://maps.googleapis.com/maps/api/js?v=3.11&sensor=false"></script>
+<script>
+  $(document).ready(initialize());
+  function () {
+    var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+    var mapOptions = {
+      zoom: 4,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+    var map = new google.maps.Map(document.getElementById('goals-map'), mapOptions);
+
+    var marker = new google.maps.Marker({
+        position: myLatlng,
+        map: map,
+        title: 'Hello World!'
+    });
+  }
+
+
+</script>
+{% endblock %}

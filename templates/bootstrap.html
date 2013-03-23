@@ -45,6 +45,12 @@
                             <li class="active"><a href="#">Home</a></li>
                             <li><a href="#about">About</a></li>
                             <li><a href="#contact">Contact</a></li>
+                            {% if user %}
+                            <li><a href="#">{{ user.nickname }}</a></li>
+                            <li><a href="{{ logout_url }}">Logout</a></li>
+                            {% else %}
+                            <li><a href="{{ login_url }}">Login</a></li>
+                            {% endif %}
                         </ul>
                     </div><!--/.nav-collapse -->
                     {% endblock %}
@@ -66,6 +72,7 @@
         <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.1.1.min.js"></script>
         <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
-
+        {% block additional_javascript %}
+        {% endblock %}
     </body>
 </html>
