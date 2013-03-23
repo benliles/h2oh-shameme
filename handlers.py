@@ -9,30 +9,36 @@ import webapp2
 log = getLogger('goal_shame.handlers')
 
 class TemplateHandler(webapp2.RequestHandler):
-    def __init__(self, **kwargs):
-        if 'template' in kwargs:
-            self.template = kwargs.pop('template')
-        super(TemplateHandler, self).__init__(**kwargs)
+    template = 'index.html'
 
     def get_template(self):
+        log.debug('%s.get_template()' % (repr(self),))
         return self.template
 
     def get_jinja_environment(self):
+        log.debug('%s.get_jinja_environment()' % (repr(self),))
         return Environment(
                 loader=FileSystemLoader(self.app.config.get('jinja_templates',
                     join(dirname(__file__),'templates'))))
 
     def get_context_data(self, **kwargs):
+        log.debug('%s.get_context_data(**kwargs=%s)' % (repr(self),
+            unicode(kwargs),))
         return kwargs
 
     def __call__(self, request, *args, **kwargs):
+        log.debug('%s(request=%s, *args=%s, **kwargs=%s)' % (repr(self),
+            repr(request), unicode(args), unicode(kwargs),))
         return self.get(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, *args, **kwargs):
+        log.debug('%s.get(*args=%s, **kwargs=%s)' % (repr(self),
+            unicode(args), unicode(kwargs),))
         self.render(self.get_context_data())
 
     def render(self, context={}):
+        log.debug('%s.render(context=%s)' % (repr(self), unicode(context),))
         template = \
             self.get_jinja_environment().get_template(self.get_template())
-        self.response.out.write(template.render(context))
+        self.response.write(template.render(context))
 
