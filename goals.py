@@ -47,8 +47,38 @@ class Create(ApiHandler):
             log.exception('Error creating a goal')
             self.response.write(dumps({'error': unicode(e)}))
 
-    def get(self):
-        return self.post()
+class Update(ApiHandler):
+    def post(self, id, *args, **kwargs):
+        log.info('Posting a goal update for %s of %s' % (id,
+            unicode(self.request.POST),))
+        goal = Goal.get_by_id(int(id))
+        if goal is None:
+            self.response.write(dumps({'error': 'invalid id: %s' % (id,)}))
+            return
+
+        try:
+            if 'name' in self.request.POST:
+                goal.name = self.request.get('name')
+            if 'latitude' in self.request.POST:
+                goal.center.latitude = float(self.request.get('latitude'))
+            if 'longitude' in self.request.POST:
+                goal.center.longitude = float(self.request.get('longitude'))
+            if 'radius' in self.request.POST:
+                goal.radius = int(self.request.get('radius'))
+            if 'expires' in self.request.POST:
+                goal.expires = \
+                    datetime.utcfromtimestamp(int(self.request.get('expires')))
+            if 'count' in self.request.POST:
+                goal.count = int(self.request.get('count'))
+            if 'desired' in self.request.POST:
+                goal.desired = self.request.get('desired') in \
+                    ['yes','1','true'] and True or False
+            goal.put()
+            self.response.write(dumps({'updated': goal.key().id()}))
+        except Exception, e:
+            log.exception('Error updating a goal')
+            self.response.write(dumps({'error': unicode(e)}))
+
 
 
 
