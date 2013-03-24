@@ -12,7 +12,7 @@
         </ol>
         {% endif %}
 
-        <div id="goals-map" class="span8" style="height: 400px;">
+        <div id="goals-map">
 
         </div>
 
@@ -30,6 +30,7 @@
 {% endblock %}
 {% block additional_javascript %}
 <script src="https://maps.googleapis.com/maps/api/js?v=3.11&sensor=false"></script>
+<script src="/static/js/goals.js"></script>
 <script>
   $(document).ready(function () {
     var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
