@@ -27,10 +27,25 @@ class Goal(db.Model):
                 'expires': mktime(self.expires.timetuple()),
                 'count': self.count,
                 'desired': self.desired,
+                'description': self.get_description(),
                 'id': str(self.key().id())}
 
     def get_as_json(self):
         return dumps(self.get_as_dict())
+
+    def get_description(self):
+        if self.desired:
+            if self.count > 1:
+                return 'Go to %s at least %d times before %s' % (self.name,
+                        self.count, unicode(self.expires))
+            return 'Go to %s before %s' % (self.name, unicode(self.expires),)
+        else:
+            if self.count > 1:
+                return 'Do not go to %s more than %d times before %s' % (self.name,
+                        self.count - 1, unicode(self.expires))
+        return 'Do not go to %s before %s' % (self.name,
+                unicode(self.expires),)
+
 
     @property
     def map_color(self):
