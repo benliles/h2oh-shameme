@@ -20,6 +20,10 @@ class ApiHandler(BaseHandler):
             return users.User(email=email)
         return super(ApiHandler, self).get_current_user()
 
+class HomeHandler(webapp2.RequestHandler):
+    def get(self, *args, **kwargs):
+        return webapp2.redirect_to('dashboard')
+
 class TemplateHandler(BaseHandler):
     template = 'index.html'
 
