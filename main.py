@@ -25,5 +25,6 @@ app = webapp2.WSGIApplication([
     webapp2.Route(r'/', 'handlers.TemplateHandler', name='home'),
     webapp2.Route(r'/dashboard/', 'goals.Dashboard', name='dashboard'),
 
+    webapp2.Route(r'/goals/', 'goals.List', name='goals'),
     webapp2.Route(r'/goals/create/', 'goals.Create', name='goals-create'),
 ], debug=True, config=config)
