@@ -22,7 +22,7 @@ import webapp2
 config = {'jinja_templates': join(dirname(__file__),'templates')}
 
 app = webapp2.WSGIApplication([
-    webapp2.Route(r'/', 'handlers.TemplateHandler', name='home'),
+    webapp2.Route(r'/', 'handlers.HomeHandler', name='home'),
     webapp2.Route(r'/dashboard/', 'goals.Dashboard', name='dashboard'),
 
     webapp2.Route(r'/goals/', 'goals.List', name='goals'),
