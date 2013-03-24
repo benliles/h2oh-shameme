@@ -9,11 +9,19 @@ from google.appengine.api import users
 
 log = getLogger('goal_shame.handlers')
 
-class TemplateHandler(webapp2.RequestHandler):
-    template = 'index.html'
-
+class BaseHandler(webapp2.RequestHandler):
     def get_current_user(self):
         return users.get_current_user()
+
+class ApiHandler(BaseHandler):
+    def get_current_user(self):
+        email = self.request.get('email', None)
+        if email is not None:
+            return users.User(email=email)
+        return super(ApiHandler, self).get_current_user()
+
+class TemplateHandler(BaseHandler):
+    template = 'index.html'
 
     def get_template(self):
         log.debug('%s.get_template()' % (repr(self),))
