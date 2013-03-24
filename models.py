@@ -22,7 +22,8 @@ class Goal(db.Model):
                 'radius': self.radius,
                 'expires': mktime(self.expires.timetuple()),
                 'count': self.count,
-                'desired': self.desired}
+                'desired': self.desired,
+                'id': self.key().id()}
 
     @property
     def map_color(self):
