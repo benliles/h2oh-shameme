@@ -1,3 +1,5 @@
+from time import mktime
+
 from google.appengine.ext import db
 from google.appengine.ext.db.polymodel import PolyModel
 from google.appengine.api import users
@@ -12,6 +14,15 @@ class Goal(db.Model):
     expires = db.DateTimeProperty(required=True)
     count = db.IntegerProperty(required=True, default=1, indexed=False)
     desired = db.BooleanProperty(required=True, default=True)
+
+    def get_as_dict(self):
+        return {'user': self.user.email(),
+                'name': self.name,
+                'center': unicode(self.center),
+                'radius': self.radius,
+                'expires': mktime(self.expires.timetuple()),
+                'count': self.count,
+                'desired': self.desired}
 
     @property
     def map_color(self):
