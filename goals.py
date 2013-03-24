@@ -5,7 +5,7 @@ from logging import getLogger
 from google.appengine.api import users
 from google.appengine.ext import db
 
-from handlers import TemplateHandler
+from handlers import ApiHandler, TemplateHandler
 from models import Goal
 
 
@@ -21,7 +21,12 @@ class Dashboard(TemplateHandler):
         log.info('Found %d goals' % (context['goals'].count(),))
         return context
 
-class Create(TemplateHandler):
+class List(ApiHandler):
+    def get(self):
+        self.response.write(dumps([goal.get_as_dict() for goal in
+                Goal.all().filter('user =', self.get_current_user())]))
+
+class Create(ApiHandler):
     def post(self, *args, **kwargs):
         log.info('Posting a goal: %s' % (unicode(self.request.POST),))
         try:
