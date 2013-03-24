@@ -27,5 +27,5 @@ app = webapp2.WSGIApplication([
 
     webapp2.Route(r'/goals/', 'goals.List', name='goals'),
     webapp2.Route(r'/goals/create/', 'goals.Create', name='goals-create'),
-    webapp2.Route(r'/goals/<id:\d+>/', 'goals.Update', name='goal-update'),
+    webapp2.Route(r'/goals/<id:\d+>/', 'goals.GoalHandler', name='goal'),
 ], debug=True, config=config)
