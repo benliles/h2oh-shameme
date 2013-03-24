@@ -47,7 +47,16 @@ class Create(ApiHandler):
             log.exception('Error creating a goal')
             self.response.write(dumps({'error': unicode(e)}))
 
-class Update(ApiHandler):
+class GoalHandler(ApiHandler):
+    def get(self, id, *args, **kwargs):
+        log.info('Getting a goal: %s' % (id,))
+        goal = Goal.get_by_id(int(id))
+        if goal is None:
+            self.response.write(dumps({'error': 'invalid id: %s' % (id,)}));
+            return
+        self.response.write(dumps(goal.get_as_dict()))
+
+
     def post(self, id, *args, **kwargs):
         log.info('Posting a goal update for %s of %s' % (id,
             unicode(self.request.POST),))
