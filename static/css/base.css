@@ -13,3 +13,10 @@ div#add-goal-map {
     height: 300px;
     border: 1px solid black;
 }
+
+img.img-meme {
+    max-width:60px;
+    float: left;
+    margin-right: 8px;
+    margin-bottom: 4px;
+}
