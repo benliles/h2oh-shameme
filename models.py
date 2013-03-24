@@ -1,5 +1,7 @@
 from time import mktime
 
+from json import dumps
+
 from google.appengine.ext import db
 from google.appengine.ext.db.polymodel import PolyModel
 from google.appengine.api import users
@@ -19,11 +21,16 @@ class Goal(db.Model):
         return {'user': self.user.email(),
                 'name': self.name,
                 'center': unicode(self.center),
+                'latitude': unicode(self.center.latitude),
+                'longitude': unicode(self.center.longitude),
                 'radius': self.radius,
                 'expires': mktime(self.expires.timetuple()),
                 'count': self.count,
                 'desired': self.desired,
                 'id': self.key().id()}
+
+    def get_as_json(self):
+        return dumps(self.get_as_dict())
 
     @property
     def map_color(self):
