@@ -17,13 +17,13 @@
 from os.path import dirname, join
 import webapp2
 
-import handlers
-
 
 
 config = {'jinja_templates': join(dirname(__file__),'templates')}
 
 app = webapp2.WSGIApplication([
-    ('/', handlers.TemplateHandler),
-    ('/dashboard/', handlers.Dashboard),
+    webapp2.Route(r'/', 'handlers.TemplateHandler', name='home'),
+    webapp2.Route(r'/dashboard/', 'goals.Dashboard', name='dashboard'),
+
+    webapp2.Route(r'/goals/create/', 'goals.Create', name='goals-create'),
 ], debug=True, config=config)

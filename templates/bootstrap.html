@@ -39,17 +39,16 @@
                         <span class="icon-bar"></span>
                     </button>
                     {% block navigation %}
-                    <a class="brand" href="#">Project name</a>
+                    <a class="brand" href="/">ShameMe</a>
                     <div class="nav-collapse collapse">
                         <ul class="nav">
-                            <li class="active"><a href="#">Home</a></li>
-                            <li><a href="#about">About</a></li>
-                            <li><a href="#contact">Contact</a></li>
+                            <li class="active"><a href="/">Home</a></li>
+                            <li><a href="{{ handler.uri_for('dashboard') }}">Dashboard</a></li>
                             {% if user %}
-                            <li><a href="#">{{ user.nickname }}</a></li>
-                            <li><a href="{{ logout_url }}">Logout</a></li>
+                            <li><a href="#">{{ user.email }}</a></li>
+                            <li><a href="{{ users.create_logout_url('/') }}">Logout</a></li>
                             {% else %}
-                            <li><a href="{{ login_url }}">Login</a></li>
+                            <li><a href="{{ users.create_login_url(request.path) }}">Login</a></li>
                             {% endif %}
                         </ul>
                     </div><!--/.nav-collapse -->
