@@ -1,67 +1,274 @@
 {% extends "bootstrap.html" %}
 {% block container_content %}
 <div class="row">
-    <div class="span9">
-        <h1>Dashboard</h1>
-        <h2>Goals</h2>
-        {% if goals %}
-        <ol>
-            {% for goal in goals %}
-            <li>{{ goal.name }} until {{ goal.expires }}</li>
-            {% endfor %}
-        </ol>
-        {% endif %}
+  <div class="span9">
+    <h1>Dashboard</h1>
+    <h2>Goals</h2>
+    {% if goals %}
+    <ol>
+      {% for goal in goals %}
+      <li>{{ goal.name }} until {{ goal.expires }}</li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+    <a href="#addGoalModal" role="button" class="btn btn-primary" data-toggle="modal"><i class="icon-plus icon-white"></i> Add a Goal</a>
 
-        <div id="goals-map">
+    <h3>Goal Map</h3>
+    <div id="current-goals-map"></div>
+  </div>
+  <div class="span3">
+    <h3>Feed</h3>
+    <ul class="thumbnails">
+      <li class="span3">
+      <h4>Example title</h4>
+      </li>
+    </ul>
 
-        </div>
-
-    </div>
-    <div class="span3">
-        <h3>Feed</h3>
-        <ul class="thumbnails">
-            <li class="span3">
-            <h4>Example title</h4>
-            </li>
-        </ul>
-
-    </div>
+  </div>
 </div>
+<div id="addGoalModal" class="modal hide fade" tabindex="-1" role="dialog"
+  aria-labelledby="addGoalModalLabel" aria-hidden="true" data-backdrop="static">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="addGoalModalLabel">Add a Goal</h3>
+  </div>
+  <div class="modal-body">
+    <form class="form-horizontal" id="addGoalForm">
+      <div class="control-group">
+        <label class="control-label" for="inputName">Name</label>
+        <div class="controls">
+          <input type="text" id="inputName" placeholder="Gym">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputCount">How many times?</label>
+        <div class="controls">
+          <input type="number" id="inputCount" min="1" max="10" value=1>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputExpires">Deadline</label>
+        <div class="controls">
+          <select id="inputExpires">
+            <option value="86400">1 Day</option>
+            <option value="259200">3 Days</option>
+            <option value="604800" selected>1 Week</option>
+            <option value="1209600">2 Weeks</option>
+            <option value="2592000">1 Month</option>
+            <option value="7776000">3 Months</option>
+            <option value="15552000">6 Months</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputRadius">How close?</label>
+        <div class="controls">
+          <select id="inputRadius">
+            <option value="20">60 feet</option>
+            <option value="40">120 feet</option>
+            <option value="80" selected>250 feet</option>
+            <option value="160">1/10th of a mile</option>
+            <option value="402">1/4 of a mile</option>
+            <option value="804">1/2 of a mile</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="inputDesired">Go there?</label>
+        <div class="controls">
+          <select id="inputDesired">
+            <option value="yes">Yes, I want to go there</option>
+            <option value="no">No, I need to avoid this place</option>
+          </select>
+        </div>
+      </div>
+      <input type="hidden" id="inputLatitude">
+      <input type="hidden" id="inputLongitude">
+      <div id="add-goal-map"></div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <button class="btn btn-primary">Add Goal</button>
+  </div>
+</div>
+
+<div id="savingModal" data-backdrop="static" data-keyboard="0" class="modal hide fade" tabindex="-1" role="dialog"
+  aria-labelledby="savingModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <h3 id="savingModalLabel">Saving</h3>
+  </div>
+  <div class="modal-body">
+  </div>
+</div>
+
+
 {% endblock %}
 {% block additional_javascript %}
 <script src="https://maps.googleapis.com/maps/api/js?v=3.11&sensor=false"></script>
-<script src="/static/js/goals.js"></script>
 <script>
-  $(document).ready(function () {
-    var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
-    var mapOptions = {
-      zoom: 12,
-      center: myLatlng,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    }
-    var map = new google.maps.Map(document.getElementById('goals-map'), mapOptions);
-    {% for goal in goals %}
-    var location = new google.maps.LatLng({{ goal.center }});
-    var marker = new google.maps.Marker({
-        position: location,
-        title: '{{ goal.name }}',
-        map: map
-    });
-    var circle = new google.maps.Circle({
-        center: location,
-        radius: {{ goal.radius }},
-        strokeColor: '{{ goal.map_color }}',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: '{{ goal.map_color }}',
-        fillOpacity: 0.35,
-        map: map
-    });
-    {% endfor %}
+  var currentGoalsMap;
+  var defaultLocation = new google.maps.LatLng(29.716421,-95.415195);
+  var addGoalMap = null;
+  var newGoalMarker = null;
+  var newGoalCircle = null;
 
-    map.setCenter(location);
+  function initialize() {
+    var mapOptions = {
+      zoom: 16,
+      center: defaultLocation,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    currentGoalsMap = new google.maps.Map(document.getElementById('current-goals-map'),
+    mapOptions);
+
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        defaultLocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+        currentGoalsMap.setCenter(defaultLocation);
+        }, function() {
+      });
+    }
+
+    {% for goal in goals %}
+    displayGoal({{ goal.get_as_json }});
+    {% endfor %}
+  }
+
+  google.maps.event.addDomListener(window, 'load', initialize);
+
+  function updateNewGoalCircle() {
+    if (newGoalCircle == null || newGoalMarker == null) {
+      return;
+    }
+    var color = $('#inputDesired').val() == 'yes' ? 'green' : 'red';
+
+    newGoalCircle.setCenter(newGoalMarker.getPosition());
+
+    newGoalCircle.setRadius(parseInt($('#inputRadius').val()));
+    newGoalCircle.setOptions({
+      fillColor: color,
+      strokeColor: color
+    });
+  }
+
+  function loadGoal(id) {
+    $.ajax('/goals/'+id+'/', {
+      success: function(data, textStatus, xhr) {
+        displayGoal(data);
+      }
+    });
+  }
+
+  function displayGoal(data) {
+    var location = new google.maps.LatLng(data['latitude'], data['longitude']);
+    var color = data['desired'] ? 'green': 'red';
+    var goalCirlce = new google.maps.Circle({
+      map: currentGoalsMap,
+      center: location,
+      fillOpacity: 0.35,
+      strokeOpacity: 1,
+      radius: parseInt(data['radius']),
+      fillColor: color,
+      strokeColor: color});
+
+    var goalMarker = new google.maps.Marker({
+      map: currentGoalsMap,
+      position: location
+    });
+  }
+
+
+  $('#addGoalModal').on('shown', function () {
+    if (addGoalMap == null) {
+      var mapOptions = {
+        zoom: 16,
+        center: defaultLocation,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+      addGoalMap = new google.maps.Map(document.getElementById('add-goal-map'),
+      mapOptions);
+      newGoalMarker = new google.maps.Marker({
+        map: addGoalMap,
+        position: defaultLocation,
+        draggable: true,
+        zIndex: 2
+      });
+      newGoalCircle = new google.maps.Circle({
+        map: addGoalMap,
+        center: defaultLocation,
+        radius: 1,
+        fillOpacity: 0.35,
+        strokeOpacity: 1,
+        zIndex: 1
+      });
+
+      updateNewGoalCircle();
+
+      $('#inputLongitude').val(defaultLocation.lng());
+      $('#inputLatitude').val(defaultLocation.lat());
+
+      google.maps.event.addListener(newGoalMarker, 'dragend', function() {
+        var newPosition = newGoalMarker.getPosition();
+        $('#inputLongitude').val(newPosition.lng());
+        $('#inputLatitude').val(newPosition.lat());
+        updateNewGoalCircle();
+      });
+
+      $('#inputRadius').change(updateNewGoalCircle);
+      $('#inputDesired').change(updateNewGoalCircle);
+    }
   });
 
+  $('#addGoalForm').submit(function () {
+    var data = {
+      name: $('#inputName').val(),
+      latitude: $('#inputLatitude').val(),
+      longitude: $('#inputLongitude').val(),
+      radius: $('#inputRadius').val(),
+      expires: parseInt($('#inputExpires').val()) + Math.round(new Date().getTime() / 1000),
+      count: $('#inputCount').val(),
+      desired: $('#inputDesired')
+    };
+
+    var error = false;
+
+    if (data['name'] == '') {
+      error = true;
+      alert('Name is required');
+    }
+    if (data['count'] == '') {
+      error = true;
+      alert('Count is required');
+    }
+
+    if (!error) {
+      $.ajax('{{ handler.uri_for('goals-create') }}', {
+        cache: false,
+        type: 'POST',
+        data: data,
+        dataType: 'json',
+        success: function(data, textStatus, xhr) {
+          $('#savingModal').modal('hide');
+          if (data.hasOwnProperty('error')) {
+            alert('Error creating the goal: ' + data['error']);
+            return;
+          }
+          if (data.hasOwnProperty('created')) {
+            loadGoal(data['created']);
+          }
+          alert('Error creating the goal');
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          $('#savingModal').modal('hide');
+          alert('There was an error creating the goal');
+        }
+      });
+
+    }
+
+  });
 
 </script>
 {% endblock %}
