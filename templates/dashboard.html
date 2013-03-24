@@ -28,12 +28,12 @@
 </div>
 <div id="addGoalModal" class="modal hide fade" tabindex="-1" role="dialog"
   aria-labelledby="addGoalModalLabel" aria-hidden="true" data-backdrop="static">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="addGoalModalLabel">Add a Goal</h3>
-  </div>
-  <div class="modal-body">
-    <form class="form-horizontal" id="addGoalForm">
+  <form class="form-horizontal" id="addGoalForm">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="addGoalModalLabel">Add a Goal</h3>
+    </div>
+    <div class="modal-body">
       <div class="control-group">
         <label class="control-label" for="inputName">Name</label>
         <div class="controls">
@@ -85,12 +85,12 @@
       <input type="hidden" id="inputLatitude">
       <input type="hidden" id="inputLongitude">
       <div id="add-goal-map"></div>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    <button class="btn btn-primary">Add Goal</button>
-  </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+      <button class="btn btn-primary">Add Goal</button>
+    </div>
+  </form>
 </div>
 
 <div id="savingModal" data-backdrop="static" data-keyboard="0" class="modal hide fade" tabindex="-1" role="dialog"
@@ -131,7 +131,7 @@
     }
 
     {% for goal in goals %}
-    displayGoal({{ goal.get_as_json }});
+    displayGoal({{ goal.get_as_json() }});
     {% endfor %}
   }
 
@@ -154,7 +154,12 @@
 
   function loadGoal(id) {
     $.ajax('/goals/'+id+'/', {
+      dataType: 'json',
       success: function(data, textStatus, xhr) {
+        if (data.hasOwnProperty('error')) {
+          alert(data['error']);
+          return;
+        }
         displayGoal(data);
       }
     });
@@ -220,7 +225,8 @@
     }
   });
 
-  $('#addGoalForm').submit(function () {
+  $('#addGoalForm').submit(function (e) {
+    e.preventDefault();
     var data = {
       name: $('#inputName').val(),
       latitude: $('#inputLatitude').val(),
@@ -228,7 +234,7 @@
       radius: $('#inputRadius').val(),
       expires: parseInt($('#inputExpires').val()) + Math.round(new Date().getTime() / 1000),
       count: $('#inputCount').val(),
-      desired: $('#inputDesired')
+      desired: $('#inputDesired').val()
     };
 
     var error = false;
@@ -256,6 +262,7 @@
           }
           if (data.hasOwnProperty('created')) {
             loadGoal(data['created']);
+            return;
           }
           alert('Error creating the goal');
 
@@ -265,7 +272,8 @@
           alert('There was an error creating the goal');
         }
       });
-
+      $('#addGoalModal').modal('hide');
+      $('#savingModal').modal('show');
     }
 
   });

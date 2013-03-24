@@ -42,7 +42,8 @@ class Create(ApiHandler):
             goal = Goal(name=name, center=center, radius=radius, expires=expires,
                     count=count, desired=desired, user=users.get_current_user())
             goal.put()
-            self.response.write(dumps({'created': goal.key().id()}))
+            log.info('Created a new goal: %s' % (goal.key().id(),))
+            self.response.write(dumps({'created': str(goal.key().id())}))
         except Exception, e:
             log.exception('Error creating a goal')
             self.response.write(dumps({'error': unicode(e)}))
@@ -69,9 +70,9 @@ class GoalHandler(ApiHandler):
             if 'name' in self.request.POST:
                 goal.name = self.request.get('name')
             if 'latitude' in self.request.POST:
-                goal.center.latitude = float(self.request.get('latitude'))
+                goal.center.lat = float(self.request.get('latitude'))
             if 'longitude' in self.request.POST:
-                goal.center.longitude = float(self.request.get('longitude'))
+                goal.center.lon = float(self.request.get('longitude'))
             if 'radius' in self.request.POST:
                 goal.radius = int(self.request.get('radius'))
             if 'expires' in self.request.POST:
